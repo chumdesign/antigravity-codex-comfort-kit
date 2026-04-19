@@ -1,19 +1,36 @@
 (function () {
   const STORAGE_KEY = "antigravity-codex-comfort-mode";
   const HIDE_KEY = "antigravity-codex-comfort-hidden";
-  const MODES = ["compact", "comfort", "spacious"];
-  const DEFAULT_MODE = "comfort";
+  const MODES = ["small", "medium", "big"];
+  const DEFAULT_MODE = "medium";
   const HOST_CLASS = "ag-comfort-composer-host";
+  const SETTINGS_MENU_CLASS = "ag-comfort-settings-menu";
+
+  function normalizeMode(mode) {
+    if (mode === "compact") {
+      return "small";
+    }
+
+    if (mode === "comfort") {
+      return "medium";
+    }
+
+    if (mode === "spacious") {
+      return "big";
+    }
+
+    return MODES.includes(mode) ? mode : DEFAULT_MODE;
+  }
 
   function applyMode(mode) {
-    const normalized = MODES.includes(mode) ? mode : DEFAULT_MODE;
+    const normalized = normalizeMode(mode);
     document.documentElement.setAttribute("data-codex-comfort-mode", normalized);
     window.localStorage.setItem(STORAGE_KEY, normalized);
   }
 
   function updateButtons(root, currentMode) {
     root.querySelectorAll("[data-mode]").forEach((button) => {
-      const isActive = button.getAttribute("data-mode") === currentMode;
+      const isActive = button.getAttribute("data-mode") === normalizeMode(currentMode);
       button.setAttribute("aria-pressed", String(isActive));
       button.classList.toggle("is-active", isActive);
     });
@@ -121,6 +138,57 @@
     }
   }
 
+  function injectSettingsMenu(root) {
+    const anchor = Array.from(
+      document.querySelectorAll("button, [role='menuitem'], [data-radix-collection-item]")
+    ).find((element) => /codex settings/i.test(element.textContent || ""));
+
+    if (!(anchor instanceof HTMLElement)) {
+      return;
+    }
+
+    const parent = anchor.parentElement;
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    if (parent.querySelector(`.${SETTINGS_MENU_CLASS}`)) {
+      updateButtons(parent, document.documentElement.getAttribute("data-codex-comfort-mode") || DEFAULT_MODE);
+      return;
+    }
+
+    const container = document.createElement("div");
+    container.className = SETTINGS_MENU_CLASS;
+    container.innerHTML = [
+      '<div class="ag-comfort-settings-title">Text size</div>',
+      '<div class="ag-comfort-settings-actions">',
+      '  <button type="button" data-mode="big">Big</button>',
+      '  <button type="button" data-mode="medium">Medium</button>',
+      '  <button type="button" data-mode="small">Small</button>',
+      "</div>"
+    ].join("");
+
+    container.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const mode = target.getAttribute("data-mode");
+      if (!mode) {
+        return;
+      }
+
+      applyMode(mode);
+      updateButtons(root, mode);
+      updateButtons(container, mode);
+      root.classList.add("is-collapsed");
+    });
+
+    anchor.insertAdjacentElement("afterend", container);
+    updateButtons(container, document.documentElement.getAttribute("data-codex-comfort-mode") || DEFAULT_MODE);
+  }
+
   function buildSwitcher() {
     if (document.getElementById("antigravity-codex-comfort-switcher")) {
       return;
@@ -132,9 +200,9 @@
     root.innerHTML = [
       '<button type="button" class="comfort-toggle" data-action="toggle-panel" aria-label="Toggle reading mode switcher">Aa</button>',
       '<div class="comfort-panel" role="group" aria-label="Reading density">',
-      '  <button type="button" data-mode="compact">Compact</button>',
-      '  <button type="button" data-mode="comfort">Comfort</button>',
-      '  <button type="button" data-mode="spacious">Spacious</button>',
+      '  <button type="button" data-mode="big">Big</button>',
+      '  <button type="button" data-mode="medium">Medium</button>',
+      '  <button type="button" data-mode="small">Small</button>',
       "</div>"
     ].join("");
 
@@ -171,6 +239,7 @@
     applyMode(savedMode);
     updateButtons(root, savedMode);
     setHidden(root, hidden);
+    injectSettingsMenu(root);
 
     document.addEventListener("click", (event) => {
       const target = event.target;
@@ -185,6 +254,7 @@
 
     const observer = new MutationObserver(() => {
       dockSwitcher(root);
+      injectSettingsMenu(root);
     });
 
     observer.observe(document.body, {
@@ -198,6 +268,18 @@
         root.classList.remove("is-collapsed");
       }
     });
+
+    window.addEventListener("resize", () => {
+      dockSwitcher(root);
+    });
+
+    if (window.ResizeObserver) {
+      const resizeObserver = new ResizeObserver(() => {
+        dockSwitcher(root);
+      });
+
+      resizeObserver.observe(document.body);
+    }
   }
 
   if (document.readyState === "loading") {
