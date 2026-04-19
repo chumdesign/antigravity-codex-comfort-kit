@@ -44,11 +44,63 @@
     return fallback instanceof HTMLElement ? fallback : null;
   }
 
+  function findSendButton(host) {
+    if (!(host instanceof HTMLElement)) {
+      return null;
+    }
+
+    const buttons = Array.from(host.querySelectorAll("button")).filter((button) => {
+      if (!(button instanceof HTMLElement)) {
+        return false;
+      }
+
+      const rect = button.getBoundingClientRect();
+      return rect.width > 20 && rect.height > 20 && rect.bottom > 0 && rect.right > 0;
+    });
+
+    if (!buttons.length) {
+      return null;
+    }
+
+    return buttons.sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      return (rectB.bottom + rectB.right) - (rectA.bottom + rectA.right);
+    })[0];
+  }
+
+  function positionNearSendButton(root, sendButton) {
+    const rect = sendButton.getBoundingClientRect();
+    const buttonSize = 38;
+    const top = Math.max(12, Math.round(rect.top - buttonSize - 12));
+    const left = Math.round(rect.left + rect.width / 2 - buttonSize / 2);
+
+    root.style.top = `${top}px`;
+    root.style.left = `${left}px`;
+    root.style.right = "auto";
+    root.classList.remove("is-docked");
+    root.classList.add("is-tracked-to-send");
+    root.classList.remove("is-floating");
+    if (root.parentElement !== document.body) {
+      document.body.appendChild(root);
+    }
+  }
+
   function dockSwitcher(root) {
     const host = findComposerHost();
+    const sendButton = findSendButton(host);
+
+    if (sendButton instanceof HTMLElement) {
+      if (host instanceof HTMLElement) {
+        host.classList.add(HOST_CLASS);
+      }
+      positionNearSendButton(root, sendButton);
+      return;
+    }
 
     if (!(host instanceof HTMLElement)) {
       root.classList.remove("is-docked");
+      root.classList.remove("is-tracked-to-send");
       root.classList.add("is-floating");
       if (root.parentElement !== document.body) {
         document.body.appendChild(root);
@@ -58,7 +110,11 @@
 
     host.classList.add(HOST_CLASS);
     root.classList.remove("is-floating");
+    root.classList.remove("is-tracked-to-send");
     root.classList.add("is-docked");
+    root.style.left = "";
+    root.style.right = "";
+    root.style.top = "";
 
     if (root.parentElement !== host) {
       host.appendChild(root);

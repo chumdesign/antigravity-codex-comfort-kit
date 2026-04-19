@@ -129,6 +129,10 @@ body {
   right: var(--ag-comfort-switcher-right);
 }
 
+.antigravity-codex-comfort-switcher.is-tracked-to-send {
+  position: fixed;
+}
+
 .antigravity-codex-comfort-switcher.is-hidden {
   top: calc(var(--ag-comfort-switcher-top) + 2px);
   right: calc(var(--ag-comfort-switcher-right) - 2px);
