@@ -3,6 +3,7 @@
   const HIDE_KEY = "antigravity-codex-comfort-hidden";
   const MODES = ["compact", "comfort", "spacious"];
   const DEFAULT_MODE = "comfort";
+  const HOST_CLASS = "ag-comfort-composer-host";
 
   function applyMode(mode) {
     const normalized = MODES.includes(mode) ? mode : DEFAULT_MODE;
@@ -22,6 +23,46 @@
     root.classList.toggle("is-hidden", hidden);
     root.classList.toggle("is-collapsed", hidden);
     window.localStorage.setItem(HIDE_KEY, hidden ? "1" : "0");
+  }
+
+  function findComposerHost() {
+    const inlineInput = document.querySelector(".request-input-panel__inline-freeform");
+    if (inlineInput instanceof HTMLElement) {
+      return (
+        inlineInput.closest("[class*='composer']") ||
+        inlineInput.closest("[class*='request-input-panel']") ||
+        inlineInput.parentElement
+      );
+    }
+
+    const footer = document.querySelector(".composer-footer");
+    if (footer instanceof HTMLElement) {
+      return footer.closest("[class*='composer']") || footer.parentElement || footer;
+    }
+
+    const fallback = document.querySelector("[class*='composerSurface'], [class*='homeShell']");
+    return fallback instanceof HTMLElement ? fallback : null;
+  }
+
+  function dockSwitcher(root) {
+    const host = findComposerHost();
+
+    if (!(host instanceof HTMLElement)) {
+      root.classList.remove("is-docked");
+      root.classList.add("is-floating");
+      if (root.parentElement !== document.body) {
+        document.body.appendChild(root);
+      }
+      return;
+    }
+
+    host.classList.add(HOST_CLASS);
+    root.classList.remove("is-floating");
+    root.classList.add("is-docked");
+
+    if (root.parentElement !== host) {
+      host.appendChild(root);
+    }
   }
 
   function buildSwitcher() {
@@ -70,13 +111,22 @@
       }
     });
 
-    document.body.appendChild(root);
+    dockSwitcher(root);
 
     const savedMode = window.localStorage.getItem(STORAGE_KEY) || DEFAULT_MODE;
     const hidden = window.localStorage.getItem(HIDE_KEY) === "1";
     applyMode(savedMode);
     updateButtons(root, savedMode);
     setHidden(root, hidden);
+
+    const observer = new MutationObserver(() => {
+      dockSwitcher(root);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
     window.addEventListener("keydown", (event) => {
       if (event.altKey && event.shiftKey && event.key.toLowerCase() === "a") {

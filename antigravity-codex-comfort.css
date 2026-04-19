@@ -17,6 +17,8 @@
   --ag-comfort-switcher-z: 9999;
   --ag-comfort-switcher-top: 76px;
   --ag-comfort-switcher-right: 20px;
+  --ag-comfort-switcher-docked-top: 10px;
+  --ag-comfort-switcher-docked-right: 74px;
 }
 
 :root,
@@ -104,10 +106,14 @@ body {
   tab-size: 2;
 }
 
+.ag-comfort-composer-host {
+  position: relative !important;
+}
+
 .antigravity-codex-comfort-switcher {
-  position: fixed;
-  top: var(--ag-comfort-switcher-top);
-  right: var(--ag-comfort-switcher-right);
+  position: absolute;
+  top: var(--ag-comfort-switcher-docked-top);
+  right: var(--ag-comfort-switcher-docked-right);
   z-index: var(--ag-comfort-switcher-z);
   display: flex;
   flex-direction: row-reverse;
@@ -117,9 +123,20 @@ body {
   color: var(--color-token-foreground);
 }
 
+.antigravity-codex-comfort-switcher.is-floating {
+  position: fixed;
+  top: var(--ag-comfort-switcher-top);
+  right: var(--ag-comfort-switcher-right);
+}
+
 .antigravity-codex-comfort-switcher.is-hidden {
   top: calc(var(--ag-comfort-switcher-top) + 2px);
   right: calc(var(--ag-comfort-switcher-right) - 2px);
+}
+
+.antigravity-codex-comfort-switcher.is-docked.is-hidden {
+  top: calc(var(--ag-comfort-switcher-docked-top) + 2px);
+  right: calc(var(--ag-comfort-switcher-docked-right) - 2px);
 }
 
 .antigravity-codex-comfort-switcher .comfort-toggle,
