@@ -58,7 +58,7 @@
     container.innerHTML = [
       '<div class="ag-comfort-settings-title">Text size</div>',
       '<div class="ag-comfort-settings-actions">',
-      '  <button type="button" data-mode="big">Big</button>',
+      '  <button type="button" data-mode="big">Large</button>',
       '  <button type="button" data-mode="medium">Medium</button>',
       '  <button type="button" data-mode="small">Small</button>',
       "</div>"
