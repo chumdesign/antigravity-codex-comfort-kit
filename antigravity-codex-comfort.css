@@ -15,6 +15,8 @@
   --ag-comfort-block-gap: 14px;
   --ag-comfort-tool-gap: 18px;
   --ag-comfort-switcher-z: 9999;
+  --ag-comfort-switcher-top: 76px;
+  --ag-comfort-switcher-right: 20px;
 }
 
 :root,
@@ -104,10 +106,11 @@ body {
 
 .antigravity-codex-comfort-switcher {
   position: fixed;
-  right: 18px;
-  bottom: 18px;
+  top: var(--ag-comfort-switcher-top);
+  right: var(--ag-comfort-switcher-right);
   z-index: var(--ag-comfort-switcher-z);
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   gap: 8px;
   font-size: 12px;
@@ -115,8 +118,8 @@ body {
 }
 
 .antigravity-codex-comfort-switcher.is-hidden {
-  right: 12px;
-  bottom: 12px;
+  top: calc(var(--ag-comfort-switcher-top) + 2px);
+  right: calc(var(--ag-comfort-switcher-right) - 2px);
 }
 
 .antigravity-codex-comfort-switcher .comfort-toggle,
@@ -132,15 +135,16 @@ body {
 }
 
 .antigravity-codex-comfort-switcher .comfort-toggle {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   font-weight: 600;
+  line-height: 1;
 }
 
 .antigravity-codex-comfort-switcher.is-hidden .comfort-toggle {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   opacity: 0.78;
 }
 
