@@ -135,7 +135,6 @@
       '  <button type="button" data-mode="compact">Compact</button>',
       '  <button type="button" data-mode="comfort">Comfort</button>',
       '  <button type="button" data-mode="spacious">Spacious</button>',
-      "  <button type=\"button\" data-action=\"hide\">Hide</button>",
       "</div>"
     ].join("");
 
@@ -151,6 +150,7 @@
       if (mode) {
         applyMode(mode);
         updateButtons(root, mode);
+        root.classList.add("is-collapsed");
       }
 
       if (action === "toggle-panel") {
@@ -162,9 +162,6 @@
         root.classList.toggle("is-collapsed");
       }
 
-      if (action === "hide") {
-        setHidden(root, true);
-      }
     });
 
     dockSwitcher(root);
@@ -174,6 +171,17 @@
     applyMode(savedMode);
     updateButtons(root, savedMode);
     setHidden(root, hidden);
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (!root.contains(target)) {
+        root.classList.add("is-collapsed");
+      }
+    });
 
     const observer = new MutationObserver(() => {
       dockSwitcher(root);

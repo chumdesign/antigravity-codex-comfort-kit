@@ -115,10 +115,7 @@ body {
   top: var(--ag-comfort-switcher-docked-top);
   right: var(--ag-comfort-switcher-docked-right);
   z-index: var(--ag-comfort-switcher-z);
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 10px;
+  display: block;
   font-size: 12px;
   color: var(--color-token-foreground);
 }
@@ -174,6 +171,10 @@ body {
 }
 
 .antigravity-codex-comfort-switcher .comfort-panel {
+  position: absolute;
+  right: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(50%);
   display: flex;
   flex-direction: column;
   align-items: stretch;
